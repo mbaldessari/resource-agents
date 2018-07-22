@@ -144,6 +144,7 @@ ocf_SCRIPTS	     =  AoEtarget		\
 			pgagent			\
 			pgsql			\
 			pingd			\
+			podman			\
 			portblock		\
 			postfix			\
 			pound			\
