@@ -209,7 +209,15 @@ monitor_cmd_exec()
 
 container_exists()
 {
-	podman inspect --format {{.State.Running}} $CONTAINER | egrep '(true|false)' >/dev/null 2>&1
+	local rc
+	local out
+
+	out=$(podman exec ${CONTAINER} $OCF_RESKEY_monitor_cmd 2>&1)
+	rc=$?
+	if [ $rc -eq 0 ] || [ $rc -eq 126 ]; then
+		return 0
+	fi
+	return 1
 }
 
 remove_container()
@@ -232,19 +240,13 @@ podman_simple_status()
 {
 	local val
 
-	# retrieve the 'Running' attribute for the container
-	val=$(podman inspect --format {{.State.Running}} $CONTAINER 2>/dev/null)
+	container_exists
 	if [ $? -ne 0 ]; then
 		#not running as a result of container not being found
 		return $OCF_NOT_RUNNING
 	fi
 
-	if ocf_is_true "$val"; then
-		# container exists and is running
-		return $OCF_SUCCESS
-	fi
-
-	return $OCF_NOT_RUNNING
+	return $OCF_SUCCESS
 }
 
 podman_monitor()
